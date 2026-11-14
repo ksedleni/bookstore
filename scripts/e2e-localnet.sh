@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Live e2e: mint → P2P sale → assert new owner + 0.1% royalty / 0% protocol fee.
+# Live e2e: content put → mint → get → P2P sale → rewrap → get → royalty asserts.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -114,9 +114,15 @@ print(o["owner"])
 
 BOOK_FILE="$HOME_DIR/e2e-book.txt"
 printf 'BookStore e2e paperback\n' >"$BOOK_FILE"
-CONTENT_HASH="$(sha256sum "$BOOK_FILE" | awk '{print $1}')"
-META_HASH="$(printf '{"title":"E2E","content_hash":"%s"}' "$CONTENT_HASH" | sha256sum | awk '{print $1}')"
+EXPECTED_HASH="$(sha256sum "$BOOK_FILE" | awk '{print $1}')"
+
+echo "== content put (alice encrypts for herself) =="
+PUT_JSON="$("$BIN" content put --from alice --file "$BOOK_FILE" --home "$HOME_DIR" --keyring-backend test)"
+CONTENT_HASH="$(echo "$PUT_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["content_hash"])')"
 echo "content_hash=$CONTENT_HASH (SHA-256 of file bytes; chain stores digest only)"
+[[ "$CONTENT_HASH" == "$EXPECTED_HASH" ]] || { echo "FAIL: put hash mismatch"; exit 1; }
+
+META_HASH="$(printf '{"title":"E2E","content_hash":"%s"}' "$CONTENT_HASH" | sha256sum | awk '{print $1}')"
 
 echo "== mint (alice) =="
 broadcast "$BIN" tx bookstore mint-original "$CONTENT_HASH" "$META_HASH" "" --from alice "${TXCOMMON[@]}"
@@ -128,6 +134,12 @@ OWNER="${ORIG_FIELDS[1]}"
 echo "minted id=$OID owner=$OWNER"
 [[ "$OID" == "1" ]] || { echo "expected first original id=1, got $OID"; exit 1; }
 [[ "$OWNER" == "$ALICE" ]] || { echo "expected owner alice"; exit 1; }
+
+echo "== content get (alice, hash verified) =="
+ALICE_OUT="$HOME_DIR/alice-out.txt"
+"$BIN" content get --from alice --content-hash "$CONTENT_HASH" --out "$ALICE_OUT" \
+  --home "$HOME_DIR" --keyring-backend test
+cmp -s "$BOOK_FILE" "$ALICE_OUT" || { echo "FAIL: alice get bytes mismatch"; exit 1; }
 
 ALICE_PRE_SALE="$(balance_of "$ALICE")"
 BOB_PRE_SALE="$(balance_of "$BOB")"
@@ -169,6 +181,16 @@ assert royalty == price * 10 // 10000
 assert seller_proceeds + royalty == price
 print("OK: ownership transferred; royalty split 0.1% / protocol fee 0%")
 PY
+
+echo "== content rewrap (alice → bob, bookstore-less) =="
+"$BIN" content rewrap --from alice --to bob --content-hash "$CONTENT_HASH" \
+  --home "$HOME_DIR" --keyring-backend test
+
+echo "== content get (bob via original-id + ownership check) =="
+BOB_OUT="$HOME_DIR/bob-out.txt"
+"$BIN" content get --from bob --original-id 1 --out "$BOB_OUT" \
+  --home "$HOME_DIR" --keyring-backend test --node "$NODE"
+cmp -s "$BOOK_FILE" "$BOB_OUT" || { echo "FAIL: bob get bytes mismatch"; exit 1; }
 
 echo
 echo "E2E PASSED"

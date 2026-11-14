@@ -1,4 +1,4 @@
-.PHONY: tidy test build demo node node-init node-start smoke-node e2e
+.PHONY: tidy test build demo content-demo node node-init node-start smoke-node e2e
 
 export PATH := /usr/local/go-new/go/bin:$(PATH)
 export GOTOOLCHAIN ?= local
@@ -14,7 +14,7 @@ tidy:
 	go mod tidy
 
 test:
-	go test ./protocol/... ./x/bookstore/... ./x/marketplace/...
+	go test ./protocol/... ./content/... ./x/bookstore/... ./x/marketplace/...
 
 build:
 	mkdir -p $(BIN_DIR)
@@ -29,6 +29,10 @@ demo: build
 	BOOKSTORE_HOME=/tmp/bookstore-demo $(BIN_DIR)/bookstore mint --from alice --file /tmp/demo-book.txt --title Demo --author A
 	BOOKSTORE_HOME=/tmp/bookstore-demo $(BIN_DIR)/bookstore sell --buyer bob --seller alice --id book-1 --price 1000000
 	BOOKSTORE_HOME=/tmp/bookstore-demo $(BIN_DIR)/bookstore show --id book-1
+
+# Offline content put/get/rewrap against the local envelope store (no node).
+content-demo: build
+	./scripts/content-demo.sh
 
 # Init a single-validator localnet (destructive for HOME_DIR).
 node-init: build
