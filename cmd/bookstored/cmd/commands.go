@@ -49,6 +49,7 @@ func initRootCmd(
 		queryCommand(),
 		txCommand(),
 		keys.Commands(),
+		ContentCmd(),
 	)
 }
 

@@ -17,9 +17,11 @@ Uniqueness is the **SHA-256 digest of the exact file bytes**. The chain stores t
 
 ```bash
 sha256sum mybook.epub   # → content-hash for mint-original
+# Or encrypt + store first (prints the same digest):
+.bin/bookstored content put --from alice --file mybook.epub --home ~/.bookstore --keyring-backend test
 ```
 
-Original ids are **1-based** (the first mint is `id=1`).
+Original ids are **1-based** (the first mint is `id=1`). See [docs/content-delivery.md](docs/content-delivery.md) for owner-gated put/get/rewrap.
 
 ## Protocol vs storefronts
 
@@ -68,9 +70,10 @@ $BIN tx bank send alice "$BOB" 5000000stake "${TX[@]}"
 # Wait until the send is indexed before continuing:
 #   $BIN q tx <txhash> --home "$HOME"
 
-# Hash file bytes (digest only goes on-chain)
+# Encrypt file for alice, store locally; digest only goes on-chain
 printf 'hello paperback\n' > /tmp/book.txt
-HASH=$(sha256sum /tmp/book.txt | awk '{print $1}')
+PUT=$($BIN content put --from alice --file /tmp/book.txt --home "$HOME" --keyring-backend test)
+HASH=$(echo "$PUT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["content_hash"])')
 META=$(printf '{"title":"Hello"}' | sha256sum | awk '{print $1}')
 
 # Mint (first original is id 1)
@@ -79,12 +82,22 @@ $BIN tx bookstore mint-original "$HASH" "$META" "" --from alice "${TX[@]}"
 $BIN q bookstore show-original 1 --home "$HOME"
 # → owner = alice, id = "1"
 
+# Owner fetches bytes (SHA-256 verified on decrypt)
+$BIN content get --from alice --content-hash "$HASH" --out /tmp/book-out.txt \
+  --home "$HOME" --keyring-backend test
+
 # P2P sale: signer is the buyer; no storefront UI
 $BIN tx bookstore p2p-sale 1 "$ALICE" 1000000 stake --from bob "${TX[@]}"
 # Wait for q tx <hash>, then:
 $BIN q bookstore show-original 1 --home "$HOME"
 # → owner = bob
 # Settlement: 0.1% royalty to creator, 0% protocol fee
+
+# Bookstore-less content handoff: seller rewraps CEK for buyer
+$BIN content rewrap --from alice --to bob --content-hash "$HASH" \
+  --home "$HOME" --keyring-backend test
+$BIN content get --from bob --original-id 1 --out /tmp/book-bob.txt \
+  --home "$HOME" --keyring-backend test --node tcp://127.0.0.1:26657
 ```
 
 Always wait for `bookstored q tx <txhash>` to succeed before relying on `show-original` / balances.
@@ -113,7 +126,8 @@ go run ./client/cmd/bookstore --help
 
 ```
 app/                      # Cosmos SDK app wiring (depinject)
-cmd/bookstored/           # Node + CLI binary (init/start/tx/query)
+cmd/bookstored/           # Node + CLI binary (init/start/tx/query/content)
+content/                  # Portable AES-GCM envelopes + local store
 x/bookstore/              # Ownership + P2P sale module
 x/marketplace/            # Optional listings + pause
 proto/                    # Protobuf definitions
@@ -121,12 +135,15 @@ protocol/                 # Portable royalty + local-ledger helpers
 client/cmd/bookstore/     # Offline reference CLI
 scripts/localnet-init.sh  # Single-validator genesis
 scripts/smoke-node.sh     # Start-until-block smoke check
-scripts/e2e-localnet.sh   # Live mint → P2P sale e2e
+scripts/e2e-localnet.sh   # Live mint → content → P2P sale → rewrap e2e
 docs/invariants.md        # Locked product invariants
+docs/content-delivery.md  # Envelope format + put/get/rewrap
 ```
 
 ## What’s still stubbed / next
 
+- IPFS/Arweave pinning + HTTP content gateway
+- Automatic CEK rewrap inside `MsgP2PSale`
 - Full indexer / public multi-node testnet docs
 - Reference web storefront (optional by design)
 - Bridges — explicitly **out of v1**
