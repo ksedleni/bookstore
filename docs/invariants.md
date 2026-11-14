@@ -11,3 +11,4 @@ Locked decisions from the architecture plan:
 7. **One mint per content hash** (SHA-256 of exact bytes) in registry scope. The ledger stores the digest only — not file contents.
 8. **Original ids are 1-based** (first mint is `id=1`).
 9. **Content delivery is off-chain and portable.** Clients verify SHA-256 on download. Owner access is CEK-wrap gated (`secp256k1-ecdh-hkdf-v1`); rewrap after sale is bookstore-less (no protocol fee).
+10. **Storefronts are optional.** The reference `web/` UI is a thin client; P2P CLI trade remains valid without any bookstore UI.
