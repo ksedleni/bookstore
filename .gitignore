@@ -1,0 +1,11 @@
+bin/
+*.exe
+*.test
+*.out
+.DS_Store
+.bookstore-demo/
+/tmp/
+vendor/
+.idea/
+.vscode/
+*.swp

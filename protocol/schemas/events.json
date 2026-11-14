@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bookstore.protocol/schemas/events.json",
+  "title": "BookStoreLedgerEvents",
+  "description": "Open event schema for indexers and third-party storefronts. Source of truth is the BookStore sovereign ledger — not a company database.",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["type", "original_id", "attrs"],
+      "properties": {
+        "type": { "const": "Minted" },
+        "original_id": { "type": "string" },
+        "attrs": {
+          "type": "object",
+          "required": ["content_hash", "creator", "owner"],
+          "properties": {
+            "content_hash": { "type": "string", "minLength": 64, "maxLength": 64 },
+            "creator": { "type": "string" },
+            "owner": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["type", "original_id", "attrs"],
+      "properties": {
+        "type": { "const": "Transfer" },
+        "original_id": { "type": "string" },
+        "attrs": {
+          "type": "object",
+          "required": ["from", "to"],
+          "properties": {
+            "from": { "type": "string" },
+            "to": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["type", "original_id", "attrs"],
+      "properties": {
+        "type": { "const": "Sale" },
+        "original_id": { "type": "string" },
+        "attrs": {
+          "type": "object",
+          "required": ["buyer", "seller", "price", "royalty", "seller_proceeds", "protocol_fee", "path"],
+          "properties": {
+            "buyer": { "type": "string" },
+            "seller": { "type": "string" },
+            "price": { "type": "string" },
+            "royalty": { "type": "string" },
+            "seller_proceeds": { "type": "string" },
+            "protocol_fee": { "const": "0" },
+            "path": { "enum": ["p2p", "listed"] },
+            "listing_id": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["type", "original_id", "attrs"],
+      "properties": {
+        "type": { "const": "Listed" },
+        "original_id": { "type": "string" },
+        "attrs": {
+          "type": "object",
+          "required": ["listing_id", "seller", "price", "denom"],
+          "properties": {
+            "listing_id": { "type": "string" },
+            "seller": { "type": "string" },
+            "price": { "type": "string" },
+            "denom": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["type", "original_id", "attrs"],
+      "properties": {
+        "type": { "const": "Delisted" },
+        "original_id": { "type": "string" },
+        "attrs": {
+          "type": "object",
+          "required": ["listing_id"],
+          "properties": {
+            "listing_id": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}
