@@ -36,7 +36,7 @@ content-demo: build
 
 # Optional reference storefront (Vite). Requires a running node with LCD :1317.
 storefront:
-	cd web && npm install && npm run dev
+	cd web && npm install && ulimit -n 65536 2>/dev/null; npm run dev
 
 # Init a single-validator localnet (destructive for HOME_DIR).
 node-init: build

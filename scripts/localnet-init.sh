@@ -41,6 +41,13 @@ if m:
         section,
         count=1,
     )
+    # Bind IPv4 explicitly so Vite/browser defaults to 127.0.0.1 work.
+    section = re.sub(
+        r'(?m)^address\s*=\s*".*"',
+        'address = "tcp://127.0.0.1:1317"',
+        section,
+        count=1,
+    )
     text = text[: m.start()] + section + text[m.end() :]
     path.write_text(text)
 PY

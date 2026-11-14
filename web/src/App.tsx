@@ -8,7 +8,12 @@ const LCD_STORAGE_KEY = "bookstore.lcdUrl";
 
 function initialLcd(): string {
   try {
-    return localStorage.getItem(LCD_STORAGE_KEY) || lcdBase();
+    const stored = localStorage.getItem(LCD_STORAGE_KEY);
+    // Migrate earlier default that went through the Vite /lcd proxy.
+    if (!stored || stored === "/lcd") {
+      return lcdBase();
+    }
+    return stored;
   } catch {
     return lcdBase();
   }
@@ -39,7 +44,7 @@ export default function App() {
 
   function applyEndpoint(event: FormEvent) {
     event.preventDefault();
-    const next = lcdDraft.trim().replace(/\/$/, "") || "/lcd";
+    const next = lcdDraft.trim().replace(/\/$/, "") || "http://127.0.0.1:1317";
     try {
       localStorage.setItem(LCD_STORAGE_KEY, next);
     } catch {
@@ -161,7 +166,7 @@ export default function App() {
                 name="lcd"
                 value={lcdDraft}
                 onChange={(e) => setLcdDraft(e.target.value)}
-                placeholder="/lcd or http://127.0.0.1:1317"
+                placeholder="http://127.0.0.1:1317"
                 spellCheck={false}
                 autoComplete="off"
               />

@@ -24,9 +24,21 @@ npm run dev
 # → http://127.0.0.1:5173
 ```
 
-Dev server proxies `/lcd/*` → `VITE_LCD_PROXY_TARGET` (default `http://127.0.0.1:1317`) so the browser avoids CORS. Override in `.env` (see `.env.example`).
+Default LCD in the UI is `http://127.0.0.1:1317` (direct). `make node-init` turns on the API + CORS and binds `127.0.0.1:1317`.
 
-In the UI, leave the LCD field as `/lcd` while using the Vite proxy, or set a full LCD URL (and enable CORS on that API if needed).
+Optional Vite proxy: set `VITE_LCD_URL=/lcd` and use `/lcd/*` → `VITE_LCD_PROXY_TARGET` (see `.env.example`).
+
+### REST paths (this chain)
+
+Ignite/grpc-gateway annotations use the `/ksedleni/bookstore/...` prefix — **not** `/bookstore/.../v1/...` (those return 501 here).
+
+```bash
+# originals (works)
+curl -s 'http://127.0.0.1:1317/ksedleni/bookstore/bookstore/original?pagination.limit=100'
+
+# listings (works)
+curl -s 'http://127.0.0.1:1317/ksedleni/bookstore/marketplace/listing?pagination.limit=100'
+```
 
 ## What it shows
 

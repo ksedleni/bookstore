@@ -1,6 +1,15 @@
 import type { Listing, Original } from "./types";
 
-const DEFAULT_LCD = "/lcd";
+// REST paths from proto google.api.http annotations (grpc-gateway).
+// Verified against bookstored LCD. /bookstore/.../v1/... returns 501 on this chain.
+export const REST = {
+  originals: "/ksedleni/bookstore/bookstore/original",
+  listings: "/ksedleni/bookstore/marketplace/listing",
+  nodeInfo: "/cosmos/base/tendermint/v1beta1/node_info",
+} as const;
+
+/** Direct LCD default — avoids Vite /lcd proxy 500s when the API is the real target. */
+const DEFAULT_LCD = "http://127.0.0.1:1317";
 
 let lcdOverride: string | null = null;
 
@@ -53,21 +62,38 @@ function normalizeListing(raw: Record<string, unknown>): Listing {
 
 async function getJson(path: string): Promise<Record<string, unknown>> {
   const url = `${lcdBase()}${path}`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText} fetching ${url}`);
+  let res: Response;
+  try {
+    res = await fetch(url);
+  } catch (err) {
+    throw new Error(
+      `network error fetching ${url} (${err instanceof Error ? err.message : String(err)}). ` +
+        `Is bookstored LCD up on ${lcdBase()}? Try: curl -s '${DEFAULT_LCD}${REST.originals}'`,
+    );
   }
-  return (await res.json()) as Record<string, unknown>;
+  const text = await res.text();
+  if (!res.ok) {
+    const snip = text.replace(/\s+/g, " ").slice(0, 240);
+    throw new Error(
+      `${res.status} fetching ${url}${snip ? ` — ${snip}` : ""}. ` +
+        `Expected path is ${REST.originals} on the LCD (port 1317), not CometBFT RPC (:26657).`,
+    );
+  }
+  try {
+    return JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    throw new Error(`invalid JSON from ${url}: ${text.slice(0, 120)}`);
+  }
 }
 
 export async function fetchOriginals(): Promise<Original[]> {
-  const data = await getJson("/ksedleni/bookstore/bookstore/original?pagination.limit=100");
+  const data = await getJson(`${REST.originals}?pagination.limit=100`);
   const rows = pickArray<Record<string, unknown>>(data, ["Original", "original"]);
   return rows.map(normalizeOriginal);
 }
 
 export async function fetchListings(): Promise<Listing[]> {
-  const data = await getJson("/ksedleni/bookstore/marketplace/listing?pagination.limit=100");
+  const data = await getJson(`${REST.listings}?pagination.limit=100`);
   const rows = pickArray<Record<string, unknown>>(data, ["Listing", "listing"]);
   return rows.map(normalizeListing);
 }

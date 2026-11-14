@@ -89,11 +89,17 @@ export function Catalog({ state, onRefresh }: Props) {
     return (
       <div className="empty">
         <p>
-          Could not reach the BookStore LCD. Start a local node, enable the API
-          (port <code>1317</code>), then refresh.
+          Could not reach the BookStore LCD. Start a local node with the API on
+          port <code>1317</code> (not CometBFT RPC <code>26657</code>), then refresh.
         </p>
         <p>
-          <code>make node-start</code> · error: {state.message}
+          Working check:{" "}
+          <code>
+            curl -s &apos;http://127.0.0.1:1317/ksedleni/bookstore/bookstore/original&apos;
+          </code>
+        </p>
+        <p>
+          <code>make node-init && make node-start</code> · {state.message}
         </p>
         <button type="button" className="btn btn--ghost btn--small" onClick={onRefresh}>
           Retry
