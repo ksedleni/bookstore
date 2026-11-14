@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package bookstore.bookstore;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "bookstore/bookstore/params.proto";
+import "bookstore/bookstore/original.proto";
+import "bookstore/bookstore/content_index.proto";
+
+option go_package = "github.com/ksedleni/bookstore/x/bookstore/types";
+
+// GenesisState defines the bookstore module's genesis state.
+message GenesisState {
+  
+  // params defines all the parameters of the module.
+           Params       params           = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  repeated Original     originalList     = 2 [(gogoproto.nullable) = false] ;
+           uint64       originalCount    = 3;
+  repeated ContentIndex contentIndexList = 4 [(gogoproto.nullable) = false] ;
+}
+

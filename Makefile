@@ -1,26 +1,46 @@
-.PHONY: test build demo tidy
+.PHONY: tidy test build demo node node-init node-start smoke-node
 
-test:
-	go test ./...
+export PATH := /usr/local/go-new/go/bin:$(PATH)
+export GOTOOLCHAIN ?= local
+
+BIN_DIR ?= .bin
+HOME_DIR ?= $(HOME)/.bookstore
+CHAIN_ID ?= bookstore-1
+DENOM ?= stake
+MONIKER ?= localvalidator
+KEY ?= alice
 
 tidy:
 	go mod tidy
 
+test:
+	go test ./protocol/... ./x/bookstore/... ./x/marketplace/...
+
 build:
-	mkdir -p bin
-	go build -o bin/bookstore ./client/cmd/bookstore
-	go build -o bin/bookstored ./chain/cmd/bookstored
+	mkdir -p $(BIN_DIR)
+	go build -o $(BIN_DIR)/bookstored ./cmd/bookstored
+	go build -o $(BIN_DIR)/bookstore ./client/cmd/bookstore
 
 demo: build
 	rm -rf /tmp/bookstore-demo
-	@echo "== hash =="
+	@echo "== offline CLI demo (no CometBFT) =="
 	printf 'Once upon a chain\n' > /tmp/demo-book.txt
-	./bin/bookstore hash /tmp/demo-book.txt
-	@echo "== mint (alice) =="
-	BOOKSTORE_HOME=/tmp/bookstore-demo ./bin/bookstore faucet --to bob --amount 5000000
-	BOOKSTORE_HOME=/tmp/bookstore-demo ./bin/bookstore mint --from alice --file /tmp/demo-book.txt --title "Demo" --author "A"
-	@echo "== P2P sale alice -> bob (no storefront) =="
-	BOOKSTORE_HOME=/tmp/bookstore-demo ./bin/bookstore sell --buyer bob --seller alice --id book-1 --price 1000000
-	BOOKSTORE_HOME=/tmp/bookstore-demo ./bin/bookstore show --id book-1
-	@echo "== events =="
-	BOOKSTORE_HOME=/tmp/bookstore-demo ./bin/bookstore events
+	BOOKSTORE_HOME=/tmp/bookstore-demo $(BIN_DIR)/bookstore faucet --to bob --amount 5000000
+	BOOKSTORE_HOME=/tmp/bookstore-demo $(BIN_DIR)/bookstore mint --from alice --file /tmp/demo-book.txt --title Demo --author A
+	BOOKSTORE_HOME=/tmp/bookstore-demo $(BIN_DIR)/bookstore sell --buyer bob --seller alice --id book-1 --price 1000000
+	BOOKSTORE_HOME=/tmp/bookstore-demo $(BIN_DIR)/bookstore show --id book-1
+
+# Init a single-validator localnet (destructive for HOME_DIR).
+node-init: build
+	./scripts/localnet-init.sh
+
+node-start: build
+	$(BIN_DIR)/bookstored start --home $(HOME_DIR) --minimum-gas-prices=0$(DENOM)
+
+# Convenience: wipe, init, then start in foreground.
+node: node-init
+	$(BIN_DIR)/bookstored start --home $(HOME_DIR) --minimum-gas-prices=0$(DENOM)
+
+# Non-interactive smoke: init + start until a block commits, then exit.
+smoke-node: build
+	./scripts/smoke-node.sh

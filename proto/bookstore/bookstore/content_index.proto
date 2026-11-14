@@ -1,0 +1,11 @@
+syntax = "proto3";
+package bookstore.bookstore;
+
+option go_package = "github.com/ksedleni/bookstore/x/bookstore/types";
+
+message ContentIndex {
+  string contentHash = 1; 
+  uint64 originalId = 2; 
+  
+}
+

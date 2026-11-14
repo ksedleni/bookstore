@@ -1,0 +1,14 @@
+syntax = "proto3";
+package bookstore.marketplace;
+
+option go_package = "github.com/ksedleni/bookstore/x/marketplace/types";
+
+message Listing {
+  uint64 id = 1;
+  uint64 originalId = 2; 
+  string seller = 3; 
+  string priceAmount = 4; 
+  string denom = 5; 
+  bool active = 6; 
+  
+}

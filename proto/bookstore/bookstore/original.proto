@@ -1,0 +1,15 @@
+syntax = "proto3";
+package bookstore.bookstore;
+
+option go_package = "github.com/ksedleni/bookstore/x/bookstore/types";
+
+message Original {
+  uint64 id = 1;
+  string contentHash = 2; 
+  string metadataHash = 3; 
+  string metadataUri = 4; 
+  string owner = 5; 
+  string royaltyPayee = 6;
+  string creator = 7;
+  
+}

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package bookstore.marketplace;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "bookstore/marketplace/params.proto";
+import "bookstore/marketplace/listing.proto";
+import "bookstore/marketplace/pause_state.proto";
+
+option go_package = "github.com/ksedleni/bookstore/x/marketplace/types";
+
+// GenesisState defines the marketplace module's genesis state.
+message GenesisState {
+  
+  // params defines all the parameters of the module.
+           Params     params       = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  repeated Listing    listingList  = 2 [(gogoproto.nullable) = false] ;
+           uint64     listingCount = 3;
+           PauseState pauseState   = 4;
+}
+

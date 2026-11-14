@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package bookstore.bookstore;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "bookstore/bookstore/params.proto";
+
+option go_package = "github.com/ksedleni/bookstore/x/bookstore/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+  
+  // UpdateParams defines a (governance) operation for updating the module
+  // parameters. The authority defaults to the x/gov module account.
+  rpc UpdateParams     (MsgUpdateParams    ) returns (MsgUpdateParamsResponse    );
+  rpc MintOriginal     (MsgMintOriginal    ) returns (MsgMintOriginalResponse    );
+  rpc TransferOriginal (MsgTransferOriginal) returns (MsgTransferOriginalResponse);
+  rpc P2PSale          (MsgP2PSale         ) returns (MsgP2PSaleResponse         );
+}
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) =                             "authority";
+  option           (amino.name) = "bookstore/x/bookstore/MsgUpdateParams";
+  
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the module parameters to update.
+  
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
+message MsgMintOriginal {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator      = 1;
+  string contentHash  = 2;
+  string metadataHash = 3;
+  string metadataUri  = 4;
+}
+
+message MsgMintOriginalResponse {
+  uint64 id = 1;
+}
+
+message MsgTransferOriginal {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator    = 1;
+  uint64 originalId = 2;
+  string to         = 3;
+}
+
+message MsgTransferOriginalResponse {}
+
+// MsgP2PSale is a paid peer-to-peer sale. Signer (creator) is the buyer.
+// Settlement: seller proceeds | 0.1% royalty to royalty_payee | 0% protocol fee.
+message MsgP2PSale {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator     = 1; // buyer
+  uint64 originalId  = 2;
+  string seller      = 3;
+  string priceAmount = 4;
+  string denom       = 5;
+}
+
+message MsgP2PSaleResponse {
+  string royalty        = 1;
+  string sellerProceeds = 2;
+  string protocolFee    = 3;
+}
+

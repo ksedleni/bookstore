@@ -1,0 +1,9 @@
+syntax = "proto3";
+package bookstore.marketplace;
+
+option go_package = "github.com/ksedleni/bookstore/x/marketplace/types";
+
+message PauseState {
+  bool paused = 1; 
+  
+}

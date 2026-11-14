@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package bookstore.marketplace;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "bookstore/marketplace/params.proto";
+
+option go_package = "github.com/ksedleni/bookstore/x/marketplace/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+  
+  // UpdateParams defines a (governance) operation for updating the module
+  // parameters. The authority defaults to the x/gov module account.
+  rpc UpdateParams  (MsgUpdateParams ) returns (MsgUpdateParamsResponse );
+  rpc CreateListing (MsgCreateListing) returns (MsgCreateListingResponse);
+  rpc CancelListing (MsgCancelListing) returns (MsgCancelListingResponse);
+  rpc BuyListing    (MsgBuyListing   ) returns (MsgBuyListingResponse   );
+  rpc SetPaused     (MsgSetPaused    ) returns (MsgSetPausedResponse    );
+}
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) =                               "authority";
+  option           (amino.name) = "bookstore/x/marketplace/MsgUpdateParams";
+  
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the module parameters to update.
+  
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
+message MsgCreateListing {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator     = 1;
+  uint64 originalId  = 2;
+  string priceAmount = 3;
+  string denom       = 4;
+}
+
+message MsgCreateListingResponse {
+  uint64 id = 1;
+}
+
+message MsgCancelListing {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator   = 1;
+  uint64 listingId = 2;
+}
+
+message MsgCancelListingResponse {}
+
+message MsgBuyListing {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator   = 1; // buyer
+  uint64 listingId = 2;
+}
+
+message MsgBuyListingResponse {
+  string royalty        = 1;
+  string sellerProceeds = 2;
+  string protocolFee    = 3;
+}
+
+// MsgSetPaused toggles the narrow marketplace pause only (does not block P2P/mint).
+// Signer must be the module authority.
+message MsgSetPaused {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1;
+  bool   paused  = 2;
+}
+
+message MsgSetPausedResponse {}
+
