@@ -35,7 +35,7 @@ func TestListingQuerySingle(t *testing.T) {
 		},
 		{
 			desc:    "KeyNotFound",
-			request: &types.QueryGetListingRequest{Id: uint64(len(msgs))},
+			request: &types.QueryGetListingRequest{Id: uint64(len(msgs)) + 1}, // beyond 1-based ids
 			err:     sdkerrors.ErrKeyNotFound,
 		},
 		{

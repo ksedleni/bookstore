@@ -27,8 +27,9 @@ func (gs GenesisState) Validate() error {
 		if _, ok := originalIdMap[elem.Id]; ok {
 			return fmt.Errorf("duplicated id for original")
 		}
-		if elem.Id >= originalCount {
-			return fmt.Errorf("original id should be lower or equal than the last id")
+		// Ids are 1-based: valid range is 1..originalCount (count = last assigned id).
+		if elem.Id == 0 || elem.Id > originalCount {
+			return fmt.Errorf("original id must be in 1..originalCount")
 		}
 		originalIdMap[elem.Id] = true
 	}

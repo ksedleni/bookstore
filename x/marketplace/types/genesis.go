@@ -27,8 +27,9 @@ func (gs GenesisState) Validate() error {
 		if _, ok := listingIdMap[elem.Id]; ok {
 			return fmt.Errorf("duplicated id for listing")
 		}
-		if elem.Id >= listingCount {
-			return fmt.Errorf("listing id should be lower or equal than the last id")
+		// Ids are 1-based: valid range is 1..listingCount.
+		if elem.Id == 0 || elem.Id > listingCount {
+			return fmt.Errorf("listing id must be in 1..listingCount")
 		}
 		listingIdMap[elem.Id] = true
 	}

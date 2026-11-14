@@ -1,4 +1,4 @@
-.PHONY: tidy test build demo node node-init node-start smoke-node
+.PHONY: tidy test build demo node node-init node-start smoke-node e2e
 
 export PATH := /usr/local/go-new/go/bin:$(PATH)
 export GOTOOLCHAIN ?= local
@@ -44,3 +44,7 @@ node: node-init
 # Non-interactive smoke: init + start until a block commits, then exit.
 smoke-node: build
 	./scripts/smoke-node.sh
+
+# Live e2e: mint → P2P sale → assert owner + 0.1% royalty / 0% protocol fee.
+e2e: build
+	./scripts/e2e-localnet.sh
