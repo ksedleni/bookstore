@@ -8,4 +8,5 @@ Locked decisions from the architecture plan:
 4. **P2P sale/transfer is first-class** and must work without any bookstore UI.
 5. **Marketplace pause is narrow** — listings/buy-listed only; never blocks mint or P2P.
 6. **No incumbent-chain dependency** for core trade (no required Ethereum / Solana / Base RPCs).
-7. **One mint per content hash** (SHA-256 of exact bytes) in registry scope.
+7. **One mint per content hash** (SHA-256 of exact bytes) in registry scope. The ledger stores the digest only — not file contents.
+8. **Original ids are 1-based** (first mint is `id=1`).

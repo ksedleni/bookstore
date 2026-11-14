@@ -36,26 +36,23 @@ func (k Keeper) SetListingCount(ctx context.Context, count uint64) {
 	store.Set(byteKey, bz)
 }
 
-// AppendListing appends a listing in the store with a new id and update the count
+// AppendListing appends a listing with a new 1-based id and updates the count.
+// The first listing receives id=1 (not 0).
 func (k Keeper) AppendListing(
 	ctx context.Context,
 	listing types.Listing,
 ) uint64 {
-	// Create the listing
 	count := k.GetListingCount(ctx)
-
-	// Set the ID of the appended value
-	listing.Id = count
+	id := count + 1 // 1-based ids
+	listing.Id = id
 
 	storeAdapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store := prefix.NewStore(storeAdapter, types.KeyPrefix(types.ListingKey))
 	appendedValue := k.cdc.MustMarshal(&listing)
 	store.Set(GetListingIDBytes(listing.Id), appendedValue)
 
-	// Update listing count
-	k.SetListingCount(ctx, count+1)
-
-	return count
+	k.SetListingCount(ctx, id)
+	return id
 }
 
 // SetListing set a specific listing in the store

@@ -36,26 +36,23 @@ func (k Keeper) SetOriginalCount(ctx context.Context, count uint64) {
 	store.Set(byteKey, bz)
 }
 
-// AppendOriginal appends a original in the store with a new id and update the count
+// AppendOriginal appends an original with a new 1-based id and updates the count.
+// The first mint receives id=1 (not 0). Count remains the number of appends.
 func (k Keeper) AppendOriginal(
 	ctx context.Context,
 	original types.Original,
 ) uint64 {
-	// Create the original
 	count := k.GetOriginalCount(ctx)
-
-	// Set the ID of the appended value
-	original.Id = count
+	id := count + 1 // 1-based ids
+	original.Id = id
 
 	storeAdapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store := prefix.NewStore(storeAdapter, types.KeyPrefix(types.OriginalKey))
 	appendedValue := k.cdc.MustMarshal(&original)
 	store.Set(GetOriginalIDBytes(original.Id), appendedValue)
 
-	// Update original count
-	k.SetOriginalCount(ctx, count+1)
-
-	return count
+	k.SetOriginalCount(ctx, id)
+	return id
 }
 
 // SetOriginal set a specific original in the store

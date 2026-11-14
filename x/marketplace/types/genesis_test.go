@@ -24,10 +24,10 @@ func TestGenesisState_Validate(t *testing.T) {
 
 				ListingList: []types.Listing{
 					{
-						Id: 0,
+						Id: 1,
 					},
 					{
-						Id: 1,
+						Id: 2,
 					},
 				},
 				ListingCount: 2,
@@ -43,12 +43,13 @@ func TestGenesisState_Validate(t *testing.T) {
 			genState: &types.GenesisState{
 				ListingList: []types.Listing{
 					{
-						Id: 0,
+						Id: 1,
 					},
 					{
-						Id: 0,
+						Id: 1,
 					},
 				},
+				ListingCount: 1,
 			},
 			valid: false,
 		},
@@ -61,6 +62,16 @@ func TestGenesisState_Validate(t *testing.T) {
 					},
 				},
 				ListingCount: 0,
+			},
+			valid: false,
+		},
+		{
+			desc: "zero listing id rejected",
+			genState: &types.GenesisState{
+				ListingList: []types.Listing{
+					{Id: 0},
+				},
+				ListingCount: 1,
 			},
 			valid: false,
 		},

@@ -57,3 +57,14 @@ func TestOriginalCount(t *testing.T) {
 	count := uint64(len(items))
 	require.Equal(t, count, keeper.GetOriginalCount(ctx))
 }
+
+func TestOriginalIDsAreOneBased(t *testing.T) {
+	keeper, ctx := keepertest.BookstoreKeeper(t)
+	id := keeper.AppendOriginal(ctx, types.Original{ContentHash: "aa"})
+	require.Equal(t, uint64(1), id)
+	got, found := keeper.GetOriginal(ctx, 1)
+	require.True(t, found)
+	require.Equal(t, uint64(1), got.Id)
+	_, foundZero := keeper.GetOriginal(ctx, 0)
+	require.False(t, foundZero)
+}

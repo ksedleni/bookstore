@@ -20,12 +20,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "OriginalAll",
 					Use:       "list-original",
-					Short:     "List all original",
+					Short:     "List all originals (ids are 1-based; first mint is id 1)",
 				},
 				{
 					RpcMethod:      "Original",
 					Use:            "show-original [id]",
-					Short:          "Shows a original by id",
+					Short:          "Show an original by id (1-based)",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}},
 				},
 				{
@@ -53,19 +53,19 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod:      "MintOriginal",
 					Use:            "mint-original [content-hash] [metadata-hash] [metadata-uri]",
-					Short:          "Send a mint-original tx",
+					Short:          "Mint a unique original from a SHA-256 content hash (file bytes digest only; first mint id=1)",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "contentHash"}, {ProtoField: "metadataHash"}, {ProtoField: "metadataUri"}},
 				},
 				{
 					RpcMethod:      "TransferOriginal",
 					Use:            "transfer-original [original-id] [to]",
-					Short:          "Send a transfer-original tx",
+					Short:          "Transfer ownership without payment (no royalty)",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "originalId"}, {ProtoField: "to"}},
 				},
 				{
 					RpcMethod:      "P2PSale",
-					Use:            "p-2-p-sale [original-id] [seller] [price-amount] [denom]",
-					Short:          "Send a p2p-sale tx",
+					Use:            "p2p-sale [original-id] [seller] [price-amount] [denom]",
+					Short:          "Paid P2P sale (signer=buyer): 0.1% royalty, 0% protocol fee; no storefront required",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "originalId"}, {ProtoField: "seller"}, {ProtoField: "priceAmount"}, {ProtoField: "denom"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx

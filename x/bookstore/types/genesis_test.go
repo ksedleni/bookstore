@@ -24,10 +24,10 @@ func TestGenesisState_Validate(t *testing.T) {
 
 				OriginalList: []types.Original{
 					{
-						Id: 0,
+						Id: 1,
 					},
 					{
-						Id: 1,
+						Id: 2,
 					},
 				},
 				OriginalCount: 2,
@@ -48,12 +48,13 @@ func TestGenesisState_Validate(t *testing.T) {
 			genState: &types.GenesisState{
 				OriginalList: []types.Original{
 					{
-						Id: 0,
+						Id: 1,
 					},
 					{
-						Id: 0,
+						Id: 1,
 					},
 				},
+				OriginalCount: 1,
 			},
 			valid: false,
 		},
@@ -66,6 +67,16 @@ func TestGenesisState_Validate(t *testing.T) {
 					},
 				},
 				OriginalCount: 0,
+			},
+			valid: false,
+		},
+		{
+			desc: "zero original id rejected",
+			genState: &types.GenesisState{
+				OriginalList: []types.Original{
+					{Id: 0},
+				},
+				OriginalCount: 1,
 			},
 			valid: false,
 		},

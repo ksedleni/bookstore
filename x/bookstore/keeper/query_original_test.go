@@ -35,7 +35,7 @@ func TestOriginalQuerySingle(t *testing.T) {
 		},
 		{
 			desc:    "KeyNotFound",
-			request: &types.QueryGetOriginalRequest{Id: uint64(len(msgs))},
+			request: &types.QueryGetOriginalRequest{Id: uint64(len(msgs)) + 1}, // beyond 1-based ids
 			err:     sdkerrors.ErrKeyNotFound,
 		},
 		{
