@@ -122,12 +122,24 @@ make demo
 go run ./client/cmd/bookstore --help
 ```
 
+## Optional reference storefront
+
+A thin Vite + React UI under [`web/`](web/) browses originals/listings via the local LCD. **CLI / P2P remains primary** — this is *a* storefront, not the store (0% protocol fee, 0.1% royalty).
+
+```bash
+make node-init && make node-start   # LCD on :1317
+make storefront                     # http://127.0.0.1:5173
+```
+
+See [web/README.md](web/README.md). Non-custodial: use `bookstored` keys for localnet; Keplr later is optional.
+
 ## Repository layout
 
 ```
 app/                      # Cosmos SDK app wiring (depinject)
 cmd/bookstored/           # Node + CLI binary (init/start/tx/query/content)
 content/                  # Portable AES-GCM envelopes + local store
+web/                      # Optional reference storefront (Vite + React)
 x/bookstore/              # Ownership + P2P sale module
 x/marketplace/            # Optional listings + pause
 proto/                    # Protobuf definitions
@@ -145,7 +157,7 @@ docs/content-delivery.md  # Envelope format + put/get/rewrap
 - IPFS/Arweave pinning + HTTP content gateway
 - Automatic CEK rewrap inside `MsgP2PSale`
 - Full indexer / public multi-node testnet docs
-- Reference web storefront (optional by design)
+- Browser wallet (Keplr) connect for the reference UI
 - Bridges — explicitly **out of v1**
 
 ## License

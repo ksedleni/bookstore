@@ -24,12 +24,37 @@ rm -rf "$HOME_DIR"
 "$BIN" genesis collect-gentxs --home "$HOME_DIR" >/dev/null
 "$BIN" genesis validate --home "$HOME_DIR" >/dev/null
 
+# Enable LCD for the optional reference storefront (and local tooling).
+APP_TOML="$HOME_DIR/config/app.toml"
+if [[ -f "$APP_TOML" ]]; then
+  python3 - "$APP_TOML" <<'PY'
+import pathlib, re, sys
+path = pathlib.Path(sys.argv[1])
+text = path.read_text()
+m = re.search(r"(?ms)^\[api\](.*?)(?=^\[|\Z)", text)
+if m:
+    section = m.group(0)
+    section = re.sub(r"(?m)^enable\s*=\s*false\b", "enable = true", section, count=1)
+    section = re.sub(
+        r"(?m)^enabled-unsafe-cors\s*=\s*false\b",
+        "enabled-unsafe-cors = true",
+        section,
+        count=1,
+    )
+    text = text[: m.start()] + section + text[m.end() :]
+    path.write_text(text)
+PY
+fi
+
 echo "Localnet initialized:"
 echo "  home:     $HOME_DIR"
 echo "  chain-id: $CHAIN_ID"
 echo "  key:      $KEY (test keyring)"
 echo "  denom:    $DENOM"
+echo "  LCD API:  http://127.0.0.1:1317 (enabled for reference storefront)"
 echo
 echo "Start with:"
 echo "  $BIN start --home $HOME_DIR --minimum-gas-prices=0${DENOM}"
 echo "  # or: make node-start"
+echo "Storefront:"
+echo "  make storefront"
