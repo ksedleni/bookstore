@@ -8,73 +8,88 @@ BookStore is a **principle and open protocol**: an original file becomes a uniqu
 |------|-------|
 | Protocol / marketplace fee | **0%** |
 | Creator royalty on paid sales | **0.1%** (fixed, not seller-configurable) |
-| Ledger | Project-owned **Cosmos SDK** sovereign appchain |
+| Ledger | Project-owned **Cosmos SDK** sovereign appchain + **CometBFT** |
 | Incumbent chains (Ethereum, Solana, Base, …) | **Not required** for mint / list / buy / resell |
 
 ## Protocol vs storefronts
 
 - **Protocol (this repo):** ownership, content-hash uniqueness, P2P transfer, P2P paid sale, optional on-ledger listings, open events.
-- **Storefronts (optional):** any third-party UI or the future reference web app. Filtering policies belong to UIs, not the ledger.
-- **Proof of bookstore-less trade:** the CLI below completes mint → P2P sale with only keys + a ledger client.
+- **Storefronts (optional):** any third-party UI. Filtering policies belong to UIs, not the ledger.
+- **Bookstore-less trade:** `MsgP2PSale` / CLI demo complete a sale with only keys + a ledger client.
 
-## Repository layout
+## Requirements
 
-```
-protocol/                 # Portable domain rules (royalty, ledger semantics, events)
-chain/
-  app/                    # App wiring (MVP stub → full Cosmos SDK app)
-  cmd/bookstored/         # Sovereign node binary entrypoint (scaffold)
-  x/bookstore/            # Mint, ownership, P2P transfer/sale (0.1% royalty)
-  x/marketplace/          # Optional listings + narrow pause (does not block P2P)
-client/cmd/bookstore/     # Reference CLI — mint/list/buy without a storefront
-protocol/schemas/         # Event / object schemas for open indexers
-docs/                     # ADRs and operator notes
-```
+- Go **1.22+** (CI/local builds use Go 1.26 toolchain when needed)
+- No Docker required for the single-node localnet
 
-## Quick start (local demo ledger)
-
-Requires Go 1.22+.
+## Quick start — local Cosmos node
 
 ```bash
 git clone https://github.com/ksedleni/bookstore.git
 cd bookstore
-make test
+
 make build
+make smoke-node          # init + start until a block commits, then exit
+
+# Or run a persistent localnet:
+make node-init           # writes ~/.bookstore (destructive)
+make node-start          # bookstored start (CometBFT in-process)
+```
+
+Manual equivalent:
+
+```bash
+go build -o .bin/bookstored ./cmd/bookstored
+./scripts/localnet-init.sh
+.bin/bookstored start --home ~/.bookstore --minimum-gas-prices=0stake
+```
+
+RPC defaults to `http://127.0.0.1:26657`. Address prefix: `store`. Bond denom: `stake`.
+
+### On-chain messages (wired)
+
+**`x/bookstore`**
+
+- `MintOriginal` — permissionless mint from content hash (duplicate hash rejected)
+- `TransferOriginal` — unpaid P2P transfer (no royalty)
+- `P2PSale` — paid P2P sale: buyer pays, **0.1%** royalty to royalty payee, **0%** protocol fee, ownership moves
+
+**`x/marketplace`** (optional convenience)
+
+- `CreateListing` / `CancelListing` / `BuyListing` — same royalty rules
+- `SetPaused` — **narrow** marketplace pause only (authority); does **not** block mint or P2P
+
+## Offline protocol CLI (no node)
+
+Still available for royalty/ledger demos without CometBFT:
+
+```bash
 make demo
+# or
+go run ./client/cmd/bookstore --help
 ```
 
-Or step by step:
+## Repository layout
 
-```bash
-export BOOKSTORE_HOME=/tmp/bookstore-demo
-rm -rf "$BOOKSTORE_HOME"
-
-go run ./client/cmd/bookstore faucet --to alice --amount 0
-go run ./client/cmd/bookstore faucet --to bob --amount 5000000
-printf 'hello paperback\n' > /tmp/book.txt
-go run ./client/cmd/bookstore mint --from alice --file /tmp/book.txt --title "Hello" --author "A"
-go run ./client/cmd/bookstore sell --buyer bob --seller alice --id book-1 --price 1000000
-go run ./client/cmd/bookstore show --id book-1
+```
+app/                      # Cosmos SDK app wiring (depinject)
+cmd/bookstored/           # Node + CLI binary (init/start/tx/query)
+x/bookstore/              # Ownership + P2P sale module
+x/marketplace/            # Optional listings + pause
+proto/                    # Protobuf definitions
+protocol/                 # Portable royalty + local-ledger helpers
+client/cmd/bookstore/     # Offline reference CLI (bookstore-less demo)
+scripts/localnet-init.sh  # Single-validator genesis
+scripts/smoke-node.sh     # Start-until-block smoke check
+docs/invariants.md        # Locked product invariants
 ```
 
-Settlement on that sale: seller receives 99.9%; creator royalty 0.1%; **protocol fee 0**.
+## What’s still stubbed / next
 
-Marketplace pause (listings only):
-
-```bash
-go run ./client/cmd/bookstore pause-market --paused true
-# list/buy blocked; mint + P2P sell/transfer still work
-```
-
-Node stub:
-
-```bash
-go run ./chain/cmd/bookstored version
-```
-
-## What is intentionally scaffold-only
-
-This first commit ships a **buildable MVP scaffold**: protocol invariants, module layout, and a reference CLI over a local ledger. Full Cosmos SDK genesis / CometBFT `start`, public RPC, and light-client sync are the next spike (see architecture plan). Domain rules already match the locked product model so the chain wiring cannot silently introduce a protocol fee or incumbent-chain dependency.
+- Full indexer / public multi-node testnet docs
+- End-to-end tx integration tests against a live localnet (mint → P2P sale via `bookstored tx`)
+- Reference web storefront (optional by design)
+- Bridges — explicitly **out of v1**
 
 ## License
 

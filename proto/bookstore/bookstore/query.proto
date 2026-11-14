@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package bookstore.bookstore;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "bookstore/bookstore/params.proto";
+import "bookstore/bookstore/original.proto";
+import "bookstore/bookstore/content_index.proto";
+
+option go_package = "github.com/ksedleni/bookstore/x/bookstore/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  
+  // Parameters queries the parameters of the module.
+  rpc Params (QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/ksedleni/bookstore/bookstore/params";
+  
+  }
+  
+  // Queries a list of Original items.
+  rpc Original    (QueryGetOriginalRequest) returns (QueryGetOriginalResponse) {
+    option (google.api.http).get = "/ksedleni/bookstore/bookstore/original/{id}";
+  
+  }
+  rpc OriginalAll (QueryAllOriginalRequest) returns (QueryAllOriginalResponse) {
+    option (google.api.http).get = "/ksedleni/bookstore/bookstore/original";
+  
+  }
+  
+  // Queries a list of ContentIndex items.
+  rpc ContentIndex    (QueryGetContentIndexRequest) returns (QueryGetContentIndexResponse) {
+    option (google.api.http).get = "/ksedleni/bookstore/bookstore/content_index/{contentHash}";
+  
+  }
+  rpc ContentIndexAll (QueryAllContentIndexRequest) returns (QueryAllContentIndexResponse) {
+    option (google.api.http).get = "/ksedleni/bookstore/bookstore/content_index";
+  
+  }
+}
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  
+  // params holds all the parameters of this module.
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+message QueryGetOriginalRequest {
+  uint64 id = 1;
+}
+
+message QueryGetOriginalResponse {
+  Original Original = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllOriginalRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllOriginalResponse {
+  repeated Original                               Original   = 1 [(gogoproto.nullable) = false];
+           cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryGetContentIndexRequest {
+  string contentHash = 1;
+}
+
+message QueryGetContentIndexResponse {
+  ContentIndex contentIndex = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllContentIndexRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllContentIndexResponse {
+  repeated ContentIndex                           contentIndex = 1 [(gogoproto.nullable) = false];
+           cosmos.base.query.v1beta1.PageResponse pagination   = 2;
+}
+
