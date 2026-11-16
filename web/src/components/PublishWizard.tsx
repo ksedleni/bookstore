@@ -26,7 +26,7 @@ export function PublishWizard({ helperReady, denom, onDone }: Props) {
       return;
     }
     if (!helperReady) {
-      setError("Start the local helper first (make publisher).");
+      setError("Helper offline — start it with make publisher.");
       return;
     }
     setBusy(true);
@@ -49,14 +49,9 @@ export function PublishWizard({ helperReady, denom, onDone }: Props) {
 
   return (
     <section className="panel" id="publish" aria-labelledby="publish-title">
-      <p className="section__eyebrow">Publisher</p>
       <h2 id="publish-title" className="section__title">
         Publish a book
       </h2>
-      <p className="section__lede">
-        Pick a file, optionally mint numbered editions (each is a unique original),
-        then list for sale. Protocol fee stays 0%; paid sales take a fixed 0.1% royalty.
-      </p>
 
       <form className="wizard" onSubmit={onSubmit}>
         <label className="field">
@@ -74,12 +69,12 @@ export function PublishWizard({ helperReady, denom, onDone }: Props) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={file?.name || "My paperback"}
+            placeholder={file?.name || "Title"}
           />
         </label>
 
         <label className="field">
-          <span>Numbered editions</span>
+          <span>Editions</span>
           <input
             type="number"
             min={1}
@@ -87,10 +82,6 @@ export function PublishWizard({ helperReady, denom, onDone }: Props) {
             value={editions}
             onChange={(e) => setEditions(Number(e.target.value) || 1)}
           />
-          <span className="field__hint">
-            Each edition gets its own file fingerprint and ownership record (not
-            duplicate remints of the same bytes).
-          </span>
         </label>
 
         <label className="check">
@@ -99,7 +90,7 @@ export function PublishWizard({ helperReady, denom, onDone }: Props) {
             checked={listForSale}
             onChange={(e) => setListForSale(e.target.checked)}
           />
-          <span>List for sale after mint</span>
+          <span>List for sale</span>
         </label>
 
         {listForSale && (
@@ -116,7 +107,7 @@ export function PublishWizard({ helperReady, denom, onDone }: Props) {
         )}
 
         <button className="btn btn--primary" type="submit" disabled={busy}>
-          {busy ? "Publishing…" : listForSale ? "Mint & list" : "Mint only"}
+          {busy ? "Publishing…" : listForSale ? "Mint & list" : "Mint"}
         </button>
       </form>
 
@@ -131,12 +122,11 @@ export function PublishWizard({ helperReady, denom, onDone }: Props) {
           <ul className="result-list">
             {result.results.map((r) => (
               <li key={r.originalId}>
-                Edition {r.edition}: original #{r.originalId}
-                {r.listed ? ` · listed #${r.listingId} @ ${r.price}` : " · not listed"}
+                Edition {r.edition}
+                {r.listed ? ` · listed @ ${r.price}` : ""}
               </li>
             ))}
           </ul>
-          <p className="muted">{result.feeNote}</p>
         </div>
       )}
     </section>

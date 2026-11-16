@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Catalog } from "./components/Catalog";
+import { Background } from "./components/Background";
 import { ConnectionBar } from "./components/ConnectionBar";
 import { PublishWizard } from "./components/PublishWizard";
 import { ShelfArt } from "./components/ShelfArt";
@@ -11,7 +11,6 @@ import type { CatalogState } from "./types";
 export default function App() {
   const [catalog, setCatalog] = useState<CatalogState>({ status: "idle" });
   const [helper, setHelper] = useState<HelperStatus | null>(null);
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const load = useCallback(async () => {
     setLcdBase(lcdBase());
@@ -56,23 +55,16 @@ export default function App() {
       </header>
 
       <main id="top">
-        <section className="shell hero">
+        <section className="shell hero hero--compact">
           <div className="hero__copy">
             <h1 className="hero__brand rise">BookStore</h1>
-            <p className="hero__headline rise rise-delay-1">
-              Publish like a paperback.
-            </p>
-            <p className="hero__lede rise rise-delay-2">
-              Mint numbered editions, list them for sale, or skip this page entirely —
-              peer-to-peer trade still works with keys alone. 0% protocol fee. 0.1%
-              creator royalty.
-            </p>
-            <div className="cta-row rise rise-delay-3">
+            <p className="hero__headline rise rise-delay-1">Publish a book.</p>
+            <div className="cta-row rise rise-delay-2">
               <a className="btn btn--primary" href="#publish">
-                Publish a book
+                Publish
               </a>
               <a className="btn btn--ghost" href="#shop">
-                Browse sales
+                Shop
               </a>
             </div>
           </div>
@@ -99,55 +91,16 @@ export default function App() {
           />
         </div>
 
-        <section className="shell panel" id="about" aria-labelledby="about-title">
-          <p className="section__eyebrow">Protocol first</p>
-          <h2 id="about-title" className="section__title">
-            This is a storefront, not the store
-          </h2>
-          <div className="principles">
-            <div className="principle">
-              <h3>0% protocol fee</h3>
-              <p>BookStore does not take a cut of settlement.</p>
-            </div>
-            <div className="principle">
-              <h3>0.1% royalty</h3>
-              <p>Fixed creator share on paid sales — not seller-configurable.</p>
-            </div>
-            <div className="principle">
-              <h3>Bookstore-less</h3>
-              <p>CLI P2P sale still works without any UI.</p>
-            </div>
-          </div>
-          <p className="section__lede" style={{ marginTop: "1.5rem" }}>
-            Localnet signing uses a small helper over your test keyring (alice /
-            bob). Browser wallets like Keplr can replace that later — still
-            non-custodial.
-          </p>
-        </section>
-
-        <section className="shell panel">
-          <button
-            type="button"
-            className="btn btn--ghost btn--small"
-            onClick={() => setShowAdvanced((v) => !v)}
-            aria-expanded={showAdvanced}
-          >
-            {showAdvanced ? "Hide advanced" : "Advanced / ledger details"}
-          </button>
-          {showAdvanced && (
-            <div className="advanced">
-              <p className="section__lede">
-                Power-user view of originals, content fingerprints, and raw listings.
-              </p>
-              <Catalog state={catalog} onRefresh={() => void load()} />
-            </div>
-          )}
-        </section>
+        <Background
+          catalog={catalog}
+          helper={helper}
+          onRefresh={() => void load()}
+        />
       </main>
 
       <footer className="shell footer">
-        <span>Reference UI · fork freely · protocol remains primary</span>
-        <a href="https://github.com/ksedleni/bookstore">ksedleni/bookstore</a>
+        <a href="#about">About</a>
+        <a href="https://github.com/ksedleni/bookstore">Source</a>
       </footer>
     </>
   );

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { Listing, Original } from "../types";
-import { shortAddr } from "../api";
 import { buyListing, type BuyResult } from "../helperApi";
 
 type Props = {
@@ -14,8 +13,8 @@ function titleFor(o: Original): string {
   if (o.metadataUri?.startsWith("inline:edition-")) {
     return `Edition ${o.metadataUri.replace("inline:edition-", "")}`;
   }
-  if (o.metadataUri) return o.metadataUri;
-  return `Original #${o.id}`;
+  if (o.metadataUri && !o.metadataUri.startsWith("inline:")) return o.metadataUri;
+  return `Edition #${o.id}`;
 }
 
 export function Shop({ originals, listings, helperReady, onDone }: Props) {
@@ -28,7 +27,7 @@ export function Shop({ originals, listings, helperReady, onDone }: Props) {
     setError(null);
     setLastBuy(null);
     if (!helperReady) {
-      setError("Start the local helper (make publisher) to buy on localnet.");
+      setError("Helper offline — start it with make publisher.");
       return;
     }
     setBusyId(listingId);
@@ -45,17 +44,12 @@ export function Shop({ originals, listings, helperReady, onDone }: Props) {
 
   return (
     <section className="panel" id="shop" aria-labelledby="shop-title">
-      <p className="section__eyebrow">Shop</p>
       <h2 id="shop-title" className="section__title">
-        Books for sale
+        Shop
       </h2>
-      <p className="section__lede">
-        Browse listings on your local ledger. Buying settles peer-to-peer on-chain
-        with a 0% protocol fee and 0.1% creator royalty — this page is optional.
-      </p>
 
       {active.length === 0 ? (
-        <p className="empty">Nothing listed yet. Publish a book above, or sell via P2P without this UI.</p>
+        <p className="empty">No books listed yet.</p>
       ) : (
         <div className="shop-list">
           {active.map((l) => {
@@ -63,10 +57,7 @@ export function Shop({ originals, listings, helperReady, onDone }: Props) {
             return (
               <article key={l.id} className="shop-row">
                 <div>
-                  <h3>{original ? titleFor(original) : `Original #${l.originalId}`}</h3>
-                  <p className="muted">
-                    Seller {shortAddr(l.seller)} · listing #{l.id}
-                  </p>
+                  <h3>{original ? titleFor(original) : `Book #${l.originalId}`}</h3>
                 </div>
                 <div className="shop-row__price">
                   <span>
@@ -90,19 +81,11 @@ export function Shop({ originals, listings, helperReady, onDone }: Props) {
       {error && <p className="banner banner--err">{error}</p>}
       {lastBuy && (
         <div className="banner banner--ok">
-          <p>Purchase settled{lastBuy.buyTx ? ` (tx ${lastBuy.buyTx.slice(0, 10)}…)` : ""}.</p>
-          {lastBuy.rewrapOk ? (
-            <p>
-              Content unlocked for the buyer key
-              {lastBuy.fetchPath ? ` → ${lastBuy.fetchPath}` : ""}.
-            </p>
-          ) : (
-            <p>
-              {lastBuy.note ||
-                "Ask the seller to hand off the encrypted file (rewrap), then download as owner."}
-            </p>
-          )}
-          <p className="muted">{lastBuy.feeNote}</p>
+          <p>
+            {lastBuy.rewrapOk
+              ? "Purchase complete — your copy is ready."
+              : "Purchase complete. Content handoff from the seller may still be needed."}
+          </p>
         </div>
       )}
     </section>

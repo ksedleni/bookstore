@@ -21,7 +21,8 @@ make storefront
 
 Open http://127.0.0.1:5173
 
-You should see **Connected** when the ledger API answers. The publisher helper (http://127.0.0.1:8787) signs localnet actions with the test keyring (`alice` / `bob`) — non-custodial local keys, not a hosted wallet. Keplr can replace the helper later.
+Publish and Shop are process-only. Protocol notes, endpoints, and ledger details live under **About**.
+You should see **Connected** when the ledger and helper are up.
 
 ### Publish two editions and list them
 

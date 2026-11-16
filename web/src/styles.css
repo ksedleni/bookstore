@@ -498,6 +498,36 @@ input {
   margin-top: 1.25rem;
 }
 
+.hero--compact {
+  min-height: auto;
+  padding: 3rem 0 1.5rem;
+}
+
+.background__block {
+  margin: 1.75rem 0;
+  max-width: 40rem;
+}
+
+.background__block p {
+  margin: 0 0 0.75rem;
+  color: rgba(235, 230, 216, 0.72);
+  line-height: 1.55;
+}
+
+.background__h {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.mono-line {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
 .status-pill {
   font-family: var(--font-ui);
   font-size: 0.78rem;
