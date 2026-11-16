@@ -122,16 +122,24 @@ make demo
 go run ./client/cmd/bookstore --help
 ```
 
-## Optional reference storefront
+## Optional reference storefront (publisher-friendly)
 
-A thin Vite + React UI under [`web/`](web/) browses originals/listings via the local LCD. **CLI / P2P remains primary** — this is *a* storefront, not the store (0% protocol fee, 0.1% royalty).
+Thin Vite + React UI under [`web/`](web/): publish editions, list, and buy on localnet via a small local helper. **CLI / P2P remains primary** — this is *a* storefront, not the store (0% protocol fee, 0.1% royalty).
 
 ```bash
-make node-init && make node-start   # LCD on :1317
-make storefront                     # http://127.0.0.1:5173
+make node-init
+make node-start
 ```
 
-See [web/README.md](web/README.md). Non-custodial: use `bookstored` keys for localnet; Keplr later is optional.
+```bash
+make publisher
+```
+
+```bash
+make storefront
+```
+
+Open http://127.0.0.1:5173 — set editions to `2`, mint & list, then buy from the shop. See [web/README.md](web/README.md).
 
 ## Repository layout
 
@@ -139,7 +147,7 @@ See [web/README.md](web/README.md). Non-custodial: use `bookstored` keys for loc
 app/                      # Cosmos SDK app wiring (depinject)
 cmd/bookstored/           # Node + CLI binary (init/start/tx/query/content)
 content/                  # Portable AES-GCM envelopes + local store
-web/                      # Optional reference storefront (Vite + React)
+web/                      # Optional storefront + local publisher helper
 x/bookstore/              # Ownership + P2P sale module
 x/marketplace/            # Optional listings + pause
 proto/                    # Protobuf definitions
@@ -157,7 +165,7 @@ docs/content-delivery.md  # Envelope format + put/get/rewrap
 - IPFS/Arweave pinning + HTTP content gateway
 - Automatic CEK rewrap inside `MsgP2PSale`
 - Full indexer / public multi-node testnet docs
-- Browser wallet (Keplr) connect for the reference UI
+- Keplr (or similar) signing in the reference UI (helper covers localnet today)
 - Bridges — explicitly **out of v1**
 
 ## License

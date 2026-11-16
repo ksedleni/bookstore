@@ -346,8 +346,10 @@ input {
   gap: 0.35rem;
   flex: 1 1 220px;
   min-width: 0;
+  font-family: var(--font-ui);
 }
 
+.field > span:first-child,
 .field label {
   font-family: var(--font-ui);
   font-size: 0.72rem;
@@ -357,7 +359,9 @@ input {
   opacity: 0.7;
 }
 
-.field input {
+.field input[type="text"],
+.field input[type="number"],
+.field input[type="file"] {
   width: 100%;
   padding: 0.65rem 0.75rem;
   border: 1px solid var(--line);
@@ -370,6 +374,158 @@ input {
 .field input:focus {
   border-color: rgba(212, 181, 122, 0.55);
   box-shadow: 0 0 0 3px var(--lamp-soft);
+}
+
+.field__hint {
+  font-size: 0.82rem;
+  color: rgba(235, 230, 216, 0.55);
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+.panel {
+  padding: 3rem 0 1rem;
+}
+
+.wizard {
+  display: grid;
+  gap: 1rem;
+  max-width: 28rem;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+}
+
+.connection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.75rem;
+  margin: 0.5rem 0 0.25rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+}
+
+.connection__sep {
+  opacity: 0.35;
+}
+
+.dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #666;
+}
+
+.dot--ok {
+  background: #6fbf8a;
+  box-shadow: 0 0 10px rgba(111, 191, 138, 0.45);
+}
+
+.dot--err {
+  background: #d27a6c;
+}
+
+.muted {
+  color: rgba(235, 230, 216, 0.55);
+}
+
+.warn {
+  color: #e8a498;
+}
+
+.banner {
+  margin-top: 1.25rem;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--line);
+  line-height: 1.5;
+}
+
+.banner--err {
+  color: #e8a498;
+}
+
+.banner--ok {
+  color: rgba(235, 230, 216, 0.88);
+}
+
+.result-list {
+  margin: 0.5rem 0;
+  padding-left: 1.1rem;
+}
+
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+
+.shop-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+}
+
+.shop-row h3 {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.shop-row__price {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-ui);
+  font-weight: 600;
+}
+
+.advanced {
+  margin-top: 1.25rem;
+}
+
+.hero--compact {
+  min-height: auto;
+  padding: 3rem 0 1.5rem;
+}
+
+.background__block {
+  margin: 1.75rem 0;
+  max-width: 40rem;
+}
+
+.background__block p {
+  margin: 0 0 0.75rem;
+  color: rgba(235, 230, 216, 0.72);
+  line-height: 1.55;
+}
+
+.background__h {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.mono-line {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.8rem;
+  word-break: break-all;
 }
 
 .status-pill {

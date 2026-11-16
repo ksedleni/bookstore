@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "helper": "node helper/server.mjs",
+    "helper:smoke": "node helper/smoke.mjs"
   },
   "dependencies": {
     "react": "^19.0.0",

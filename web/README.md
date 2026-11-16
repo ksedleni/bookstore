@@ -1,58 +1,65 @@
 # BookStore reference storefront
 
-Optional, thin, forkable web UI over the BookStore ledger. **The protocol remains usable without it** — mint, P2P sale, and content put/get stay on the `bookstored` CLI.
+Optional UI for publishers and buyers. **The protocol works without it** (CLI / P2P). Protocol fee **0%**. Creator royalty **0.1%** on paid sales.
 
-| Principle | Value |
-|-----------|-------|
-| Protocol fee | **0%** |
-| Creator royalty | **0.1%** on paid sales |
-| Custody | **None** — this UI does not hold keys |
+## Run (publisher-friendly)
 
-## Run
-
-Prerequisites: Node 20+, a local `bookstored` node with the API enabled (LCD default `http://127.0.0.1:1317`).
+Three terminals from the repo root:
 
 ```bash
-# terminal 1 — from repo root
-make node-init && make node-start   # enables LCD :1317
-
-# terminal 2
-cd web
-npm install
-# if the host has a low file-watch limit: ulimit -n 65536
-npm run dev
-# → http://127.0.0.1:5173
+make node-init
+make node-start
 ```
 
-Default LCD in the UI is `http://127.0.0.1:1317` (direct). `make node-init` turns on the API + CORS and binds `127.0.0.1:1317`.
-
-Optional Vite proxy: set `VITE_LCD_URL=/lcd` and use `/lcd/*` → `VITE_LCD_PROXY_TARGET` (see `.env.example`).
-
-### REST paths (this chain)
-
-Ignite/grpc-gateway annotations use the `/ksedleni/bookstore/...` prefix — **not** `/bookstore/.../v1/...` (those return 501 here).
+```bash
+make publisher
+```
 
 ```bash
-# originals (works)
+make storefront
+```
+
+Open http://127.0.0.1:5173
+
+Publish and Shop are process-only. Protocol notes, endpoints, and ledger details live under **About**.
+You should see **Connected** when the ledger and helper are up.
+
+### Publish two editions and list them
+
+1. Open **Publish a book**
+2. Choose a file
+3. Set **Numbered editions** to `2`
+4. Keep **List for sale** on and set a price (default `1000000` stake)
+5. Click **Mint & list**
+
+Each edition is a distinct file fingerprint and original id (edition bytes append a small footer so hashes differ). Both appear under **Books for sale**.
+
+### Buy as the localnet buyer
+
+On **Books for sale**, click **Buy**. The helper settles `buy-listing` as `bob`, rewraps content from `alice` → `bob`, and writes the decrypted file under `/tmp`.
+
+## Advanced
+
+Ledger fingerprint / LCD details stay under **Advanced / ledger details**.
+
+Direct LCD (CORS enabled by `make node-init`):
+
+```bash
 curl -s 'http://127.0.0.1:1317/ksedleni/bookstore/bookstore/original?pagination.limit=100'
-
-# listings (works)
-curl -s 'http://127.0.0.1:1317/ksedleni/bookstore/marketplace/listing?pagination.limit=100'
 ```
-
-## What it shows
-
-- Originals: `id`, `contentHash`, `metadataUri`, `owner`, `creator`
-- Active marketplace listings joined by `originalId`
-- Copy that this is *a* storefront; CLI/P2P is primary
-
-## Keys / wallet
-
-Localnet: use `bookstored keys … --keyring-backend test` and the CLI for mint/sale/content. Keplr (or similar) can be added later against chain id `bookstore-1` — still non-custodial; not required to sell.
 
 ## Build
 
 ```bash
+cd web
+npm install
 npm run build
-npm run preview
+```
+
+## Smoke
+
+With a node already running (`make node-start`):
+
+```bash
+make publisher-smoke
 ```

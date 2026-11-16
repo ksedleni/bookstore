@@ -88,19 +88,8 @@ export function Catalog({ state, onRefresh }: Props) {
   if (state.status === "error") {
     return (
       <div className="empty">
-        <p>
-          Could not reach the BookStore LCD. Start a local node with the API on
-          port <code>1317</code> (not CometBFT RPC <code>26657</code>), then refresh.
-        </p>
-        <p>
-          Working check:{" "}
-          <code>
-            curl -s &apos;http://127.0.0.1:1317/ksedleni/bookstore/bookstore/original&apos;
-          </code>
-        </p>
-        <p>
-          <code>make node-init && make node-start</code> · {state.message}
-        </p>
+        <p>Ledger API unreachable.</p>
+        <p className="muted">{state.message}</p>
         <button type="button" className="btn btn--ghost btn--small" onClick={onRefresh}>
           Retry
         </button>
@@ -115,16 +104,7 @@ export function Catalog({ state, onRefresh }: Props) {
   if (state.originals.length === 0) {
     return (
       <div className="empty">
-        <p>No originals on this node yet. Mint from the CLI (this UI is optional):</p>
-        <p>
-          <code>
-            bookstored content put --from alice --file ./book.txt …
-          </code>
-          <br />
-          <code>
-            bookstored tx bookstore mint-original &lt;contentHash&gt; …
-          </code>
-        </p>
+        <p>No originals on this node yet.</p>
         <button type="button" className="btn btn--ghost btn--small" onClick={onRefresh}>
           Refresh
         </button>

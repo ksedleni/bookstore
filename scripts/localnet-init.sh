@@ -19,7 +19,9 @@ fi
 rm -rf "$HOME_DIR"
 "$BIN" init "$MONIKER" --chain-id "$CHAIN_ID" --home "$HOME_DIR" >/dev/null
 "$BIN" keys add "$KEY" --keyring-backend test --home "$HOME_DIR" >/dev/null 2>&1
+"$BIN" keys add bob --keyring-backend test --home "$HOME_DIR" >/dev/null 2>&1
 "$BIN" genesis add-genesis-account "$KEY" "1000000000000${DENOM}" --keyring-backend test --home "$HOME_DIR"
+"$BIN" genesis add-genesis-account bob "5000000000${DENOM}" --keyring-backend test --home "$HOME_DIR"
 "$BIN" genesis gentx "$KEY" "100000000000${DENOM}" --chain-id "$CHAIN_ID" --keyring-backend test --home "$HOME_DIR" >/dev/null
 "$BIN" genesis collect-gentxs --home "$HOME_DIR" >/dev/null
 "$BIN" genesis validate --home "$HOME_DIR" >/dev/null
@@ -56,12 +58,11 @@ fi
 echo "Localnet initialized:"
 echo "  home:     $HOME_DIR"
 echo "  chain-id: $CHAIN_ID"
-echo "  key:      $KEY (test keyring)"
+echo "  keys:     $KEY (publisher) + bob (buyer), test keyring"
 echo "  denom:    $DENOM"
-echo "  LCD API:  http://127.0.0.1:1317 (enabled for reference storefront)"
+echo "  LCD API:  http://127.0.0.1:1317 (CORS enabled for storefront)"
 echo
 echo "Start with:"
-echo "  $BIN start --home $HOME_DIR --minimum-gas-prices=0${DENOM}"
-echo "  # or: make node-start"
-echo "Storefront:"
+echo "  make node-start"
+echo "  make publisher"
 echo "  make storefront"

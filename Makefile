@@ -1,4 +1,4 @@
-.PHONY: tidy test build demo content-demo storefront node node-init node-start smoke-node e2e
+.PHONY: tidy test build demo content-demo storefront publisher publisher-smoke node node-init node-start smoke-node e2e
 
 export PATH := /usr/local/go-new/go/bin:$(PATH)
 export GOTOOLCHAIN ?= local
@@ -37,6 +37,14 @@ content-demo: build
 # Optional reference storefront (Vite). Requires a running node with LCD :1317.
 storefront:
 	cd web && npm install && ulimit -n 65536 2>/dev/null; npm run dev
+
+# Local publisher helper (signs with test keyring alice/bob). Bind 127.0.0.1:8787.
+publisher: build
+	node web/helper/server.mjs
+
+# Smoke: helper health against a running node + keyring.
+publisher-smoke: build
+	node web/helper/smoke.mjs
 
 # Init a single-validator localnet (destructive for HOME_DIR).
 node-init: build
